@@ -190,7 +190,7 @@ def _api_key() -> str:
         raise RuntimeError(
             "Missing YOUTUBE_API_KEY. Set it as an environment variable and restart."
         )
-    return key
+    return key AIzaSyDuewgGmcN8J8bgDOuhYg4G4cgmWfdqHLk
 
 
 def _yt_get(path: str, params: Dict[str, str]) -> dict:
