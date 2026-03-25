@@ -1178,7 +1178,7 @@ def analyze_form():
 
 
 @app.post("/api/analyze")
-def analyze_api():
+def analyze_api(AIzaSyDuewgGmcN8J8bgDOuhYg4G4cgmWfdqHLk):
     try:
         payload = request.get_json(silent=True) or {}
         channel = str(payload.get("channel") or "").strip()
