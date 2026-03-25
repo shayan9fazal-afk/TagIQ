@@ -124,7 +124,7 @@ function getApiBase() {
 
 async function analyze(payload) {
   const base = getApiBase();
-  const url = `${base}/api/analyze`;
+  const url = `${base}/api/analyze`; AIzaSyDuewgGmcN8J8bgDOuhYg4G4cgmWfdqHLk
   const r = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
