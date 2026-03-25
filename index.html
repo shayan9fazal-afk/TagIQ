@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TrendTags — YouTube Channel Intelligence</title>
+    <meta
+      name="description"
+      content="Analyze a YouTube channel’s recent videos to extract trending phrases, niche hashtags, and global trending hashtags. Bulk copy tags for YouTube SEO."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="bg"></div>
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand__icon" aria-hidden="true"></div>
+        <div class="brand__text">
+          <div class="brand__name">TrendTags</div>
+          <div class="brand__tagline">Powered by YouTube API</div>
+        </div>
+      </div>
+      <div class="topbar__right">
+        <a class="link" href="https://developers.google.com/youtube/v3" target="_blank" rel="noreferrer">API docs</a>
+        <button class="btn btn--ghost" id="themeToggle" type="button">Toggle theme</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <div class="hero__badge">AI‑powered channel intelligence</div>
+        <h1 class="hero__title">
+          Uncover the <span class="accent">metadata</span><br />
+          driving top creators.
+        </h1>
+        <p class="hero__subtitle">
+          Analyze any channel’s recent videos by performance (views/day) to extract proven phrases, niche Shorts hashtags, and global trending hashtags — then bulk copy into YouTube SEO fields.
+        </p>
+      </section>
+
+      <section class="card">
+        <form id="analyzeForm" class="form">
+          <div class="grid grid--2">
+            <label class="field">
+              <span class="field__label">Channel identifier</span>
+              <span class="field__hint">Channel URL, @handle, UC… ID, or name</span>
+              <input
+                class="input"
+                name="channel"
+                id="channel"
+                placeholder="e.g. https://www.youtube.com/@MrBeast"
+                autocomplete="off"
+                required
+              />
+            </label>
+
+            <label class="field">
+              <span class="field__label">Target keywords (optional)</span>
+              <span class="field__hint">Used to personalize tag suggestions</span>
+              <input
+                class="input"
+                name="keywords"
+                id="keywords"
+                placeholder="e.g. invincible, anime edit, productivity 2026"
+                autocomplete="off"
+              />
+            </label>
+          </div>
+
+          <div class="grid grid--3">
+            <label class="field">
+              <span class="field__label">Recent videos to analyze</span>
+              <span class="field__hint">Between 10 and 300</span>
+              <input class="input" name="max_videos" id="max_videos" value="100" />
+            </label>
+
+            <label class="field">
+              <span class="field__label">Global region code</span>
+              <span class="field__hint">Defaults to US</span>
+              <input class="input" name="region" id="region" value="US" placeholder="US, GB, PK, IN" />
+            </label>
+
+            <label class="field">
+              <span class="field__label">Category (optional)</span>
+              <span class="field__hint">Name or ID (e.g. music / 10)</span>
+              <input class="input" name="category_id" id="category_id" placeholder="animation, gaming, music, 10" />
+            </label>
+          </div>
+
+          <details class="advanced" id="advanced">
+            <summary class="advanced__summary">Advanced settings</summary>
+            <div class="grid grid--2 advanced__body">
+              <label class="field">
+                <span class="field__label">Backend API base URL</span>
+                <span class="field__hint">Where your Python server is running</span>
+                <input class="input" name="api_base" id="api_base" placeholder="http://127.0.0.1:8000" />
+              </label>
+
+              <div class="field">
+                <span class="field__label">Output format</span>
+                <span class="field__hint">Copy‑paste friendly</span>
+                <div class="segmented" role="group" aria-label="Output format">
+                  <button class="segmented__btn is-active" type="button" data-format="youtube">YouTube</button>
+                  <button class="segmented__btn" type="button" data-format="csv">CSV</button>
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <div class="actions">
+            <button class="btn btn--primary" id="analyzeBtn" type="submit">
+              <span class="btn__text">Analyze channel</span>
+              <span class="btn__arrow" aria-hidden="true">→</span>
+            </button>
+            <div class="muted">
+              Tip: Use <span class="kbd">Copy all</span> to paste everything at once.
+            </div>
+          </div>
+        </form>
+      </section>
+
+      <section class="results" id="results" hidden>
+        <div class="results__header">
+          <div>
+            <div class="results__title">Results</div>
+            <div class="results__meta" id="resultsMeta"></div>
+          </div>
+          <div class="results__headerActions">
+            <button class="btn btn--ghost" id="copyAllBtn" type="button">Copy all</button>
+            <button class="btn btn--ghost" id="downloadJsonBtn" type="button">Download JSON</button>
+          </div>
+        </div>
+
+        <div class="panels">
+          <div class="panel">
+            <div class="panel__title">Suggested tags</div>
+            <div class="panel__sub">Comma‑separated for YouTube tags field</div>
+            <div class="chiplist" id="tagsChips"></div>
+            <div class="panel__actions">
+              <button class="btn btn--small" id="copyTagsBtn" type="button">Copy tags</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__title">Suggested hashtags</div>
+            <div class="panel__sub">Use 3–8 hashtags (don’t spam)</div>
+            <div class="chiplist" id="hashtagsChips"></div>
+            <div class="panel__actions">
+              <button class="btn btn--small" id="copyHashtagsBtn" type="button">Copy hashtags</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__title">Shorts niche hashtags</div>
+            <div class="panel__sub">Channel‑specific Shorts signals (duration ≤ 60s + #shorts patterns)</div>
+            <div class="chiplist" id="shortsHashtagsChips"></div>
+            <div class="panel__actions">
+              <button class="btn btn--small btn--primary" id="copyShortsHashtagsBtn" type="button">Copy Shorts hashtags</button>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel__title">Global trending hashtags</div>
+            <div class="panel__sub">YouTube‑wide trending (mostPopular). Mixed conservatively for relevance.</div>
+            <div class="chiplist" id="globalHashtagsChips"></div>
+            <div class="panel__actions">
+              <button class="btn btn--small" id="copyGlobalHashtagsBtn" type="button">Copy global hashtags</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panels panels--wide">
+          <div class="panel">
+            <div class="panel__title">Trending phrases (channel)</div>
+            <div class="panel__sub">Ranked by views/day lift + recency in top performers</div>
+            <ol class="list" id="trendingPhrases"></ol>
+          </div>
+          <div class="panel">
+            <div class="panel__title">Trending Shorts (channel)</div>
+            <div class="panel__sub">Shorts‑only signals from your channel</div>
+            <ol class="list" id="trendingShortsPhrases"></ol>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel__title">Top recent performers</div>
+          <div class="panel__sub">Views/day is used as the performance signal</div>
+          <div class="tableWrap">
+            <table class="table" aria-label="Top videos">
+              <thead>
+                <tr>
+                  <th>Video</th>
+                  <th class="num">Views</th>
+                  <th class="num">Views/day</th>
+                </tr>
+              </thead>
+              <tbody id="topVideos"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="muted">
+          This tool improves SEO relevance; it cannot guarantee virality. Avoid irrelevant tags — they can hurt performance.
+        </div>
+      </footer>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
+
